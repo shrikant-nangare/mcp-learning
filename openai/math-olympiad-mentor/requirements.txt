@@ -1,0 +1,10 @@
+# Required (for agent)
+openai
+
+# PDF support (load PDF and ask questions from it)
+pypdf>=4.0
+
+# Optional: for nice HTML rendering in the GUI (tables, lists, bold)
+# pip install tkhtmlview markdown
+# tkhtmlview>=0.3.2
+# markdown>=3.5
