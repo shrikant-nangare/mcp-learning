@@ -1,0 +1,416 @@
+{
+  "concept_status": {},
+  "reference_path": "/Users/shrikant/repos/mcp-learning/openai/math-olympiad-mentor/books",
+  "memory_notes": "",
+  "concept_cache": {
+    "/Users/shrikant/repos/mcp-learning/openai/math-olympiad-mentor/books": {
+      "signature": "/Users/shrikant/repos/mcp-learning/openai/math-olympiad-mentor/books:[('CREST_Mathematics_6_Workbook_Final.pdf', 1772332787868141040), ('README.txt', 1772332731175828239)]",
+      "concepts": [
+        [
+          "Chapter ## Chapter 1: Knowing Your Numbers",
+          "Natural numbers"
+        ],
+        [
+          "Chapter ## Chapter 1: Knowing Your Numbers",
+          "Whole numbers"
+        ],
+        [
+          "Chapter ## Chapter 1: Knowing Your Numbers",
+          "Successor and predecessor"
+        ],
+        [
+          "Chapter ## Chapter 1: Knowing Your Numbers",
+          "Properties of addition"
+        ],
+        [
+          "Chapter ## Chapter 1: Knowing Your Numbers",
+          "Properties of subtraction"
+        ],
+        [
+          "Chapter ## Chapter 1: Knowing Your Numbers",
+          "Properties of multiplication"
+        ],
+        [
+          "Chapter ## Chapter 1: Knowing Your Numbers",
+          "Properties of division"
+        ],
+        [
+          "Chapter ## Chapter 1: Knowing Your Numbers",
+          "Even and odd numbers"
+        ],
+        [
+          "Chapter ## Chapter 1: Knowing Your Numbers",
+          "Prime and composite numbers"
+        ],
+        [
+          "Chapter ## Chapter 1: Knowing Your Numbers",
+          "Co-prime numbers"
+        ],
+        [
+          "Chapter ## Chapter 1: Knowing Your Numbers",
+          "Twin primes and prime triplets"
+        ],
+        [
+          "Chapter ## Chapter 1: Knowing Your Numbers",
+          "Perfect numbers"
+        ],
+        [
+          "Chapter ## Chapter 1: Knowing Your Numbers",
+          "Division algorithm (Dividend\u2013Divisor\u2013Quotient\u2013Remainder)"
+        ],
+        [
+          "Chapter ## Chapter 1: Knowing Your Numbers",
+          "Divisibility rules (2, 3, 4, 5, 6, 7, 8, 9, 10, 11)"
+        ],
+        [
+          "Chapter ## Chapter 1: Knowing Your Numbers",
+          "Prime factors"
+        ],
+        [
+          "Chapter ## Chapter 1: Knowing Your Numbers",
+          "Prime factorization"
+        ],
+        [
+          "Chapter ## Chapter 1: Knowing Your Numbers",
+          "HCF (GCD) by prime factorization"
+        ],
+        [
+          "Chapter ## Chapter 1: Knowing Your Numbers",
+          "LCM by prime factorization"
+        ],
+        [
+          "Chapter 2: Number System and Integers",
+          "Integers (positive, negative, zero)"
+        ],
+        [
+          "Chapter 2: Number System and Integers",
+          "Number line representation"
+        ],
+        [
+          "Chapter 2: Number System and Integers",
+          "Comparing and ordering integers"
+        ],
+        [
+          "Chapter 2: Number System and Integers",
+          "Addition of integers"
+        ],
+        [
+          "Chapter 2: Number System and Integers",
+          "Subtraction of integers"
+        ],
+        [
+          "Chapter 2: Number System and Integers",
+          "Multiplication of integers"
+        ],
+        [
+          "Chapter 2: Number System and Integers",
+          "Division of integers"
+        ],
+        [
+          "Chapter 2: Number System and Integers",
+          "Properties of operations on integers"
+        ],
+        [
+          "Chapter 3: Fractions",
+          "Types of fractions (proper, improper, mixed)"
+        ],
+        [
+          "Chapter 3: Fractions",
+          "Equivalent fractions"
+        ],
+        [
+          "Chapter 3: Fractions",
+          "Simplifying fractions"
+        ],
+        [
+          "Chapter 3: Fractions",
+          "Comparing and ordering fractions"
+        ],
+        [
+          "Chapter 3: Fractions",
+          "Addition and subtraction of fractions"
+        ],
+        [
+          "Chapter 3: Fractions",
+          "Multiplication of fractions"
+        ],
+        [
+          "Chapter 3: Fractions",
+          "Division of fractions"
+        ],
+        [
+          "Chapter 3: Fractions",
+          "Fraction of a quantity"
+        ],
+        [
+          "Chapter 4: Decimals",
+          "Place value in decimals"
+        ],
+        [
+          "Chapter 4: Decimals",
+          "Converting fractions to decimals"
+        ],
+        [
+          "Chapter 4: Decimals",
+          "Converting decimals to fractions"
+        ],
+        [
+          "Chapter 4: Decimals",
+          "Comparing and ordering decimals"
+        ],
+        [
+          "Chapter 4: Decimals",
+          "Addition and subtraction of decimals"
+        ],
+        [
+          "Chapter 4: Decimals",
+          "Multiplication of decimals"
+        ],
+        [
+          "Chapter 4: Decimals",
+          "Division of decimals"
+        ],
+        [
+          "Chapter 4: Decimals",
+          "Rounding decimals (estimation)"
+        ],
+        [
+          "Chapter 5: Algebra",
+          "Algebraic expressions"
+        ],
+        [
+          "Chapter 5: Algebra",
+          "Variables and constants"
+        ],
+        [
+          "Chapter 5: Algebra",
+          "Like and unlike terms"
+        ],
+        [
+          "Chapter 5: Algebra",
+          "Addition and subtraction of algebraic expressions"
+        ],
+        [
+          "Chapter 5: Algebra",
+          "Simple linear equations"
+        ],
+        [
+          "Chapter 5: Algebra",
+          "Solving one-variable equations"
+        ],
+        [
+          "Chapter 5: Algebra",
+          "Substitution and evaluation of expressions"
+        ],
+        [
+          "Chapter 6: Ratio and Proportions",
+          "Ratio and its simplification"
+        ],
+        [
+          "Chapter 6: Ratio and Proportions",
+          "Equivalent ratios"
+        ],
+        [
+          "Chapter 6: Ratio and Proportions",
+          "Proportion"
+        ],
+        [
+          "Chapter 6: Ratio and Proportions",
+          "Unitary method"
+        ],
+        [
+          "Chapter 6: Ratio and Proportions",
+          "Direct proportion"
+        ],
+        [
+          "Chapter 6: Ratio and Proportions",
+          "Inverse proportion"
+        ],
+        [
+          "Chapter 6: Ratio and Proportions",
+          "Word problems on ratio and proportion"
+        ],
+        [
+          "Chapter 7: Understanding Elementary Shape",
+          "Basic 2D shapes and properties"
+        ],
+        [
+          "Chapter 7: Understanding Elementary Shape",
+          "Basic 3D solids and properties"
+        ],
+        [
+          "Chapter 7: Understanding Elementary Shape",
+          "Faces, edges, vertices"
+        ],
+        [
+          "Chapter 7: Understanding Elementary Shape",
+          "Angles (acute, obtuse, right, straight, reflex)"
+        ],
+        [
+          "Chapter 7: Understanding Elementary Shape",
+          "Measuring angles"
+        ],
+        [
+          "Chapter 7: Understanding Elementary Shape",
+          "Types of triangles"
+        ],
+        [
+          "Chapter 7: Understanding Elementary Shape",
+          "Types of quadrilaterals"
+        ],
+        [
+          "Chapter 8: Basic Geometrical Ideas",
+          "Point, line, ray, line segment"
+        ],
+        [
+          "Chapter 8: Basic Geometrical Ideas",
+          "Parallel and perpendicular lines"
+        ],
+        [
+          "Chapter 8: Basic Geometrical Ideas",
+          "Intersecting lines"
+        ],
+        [
+          "Chapter 8: Basic Geometrical Ideas",
+          "Collinear points"
+        ],
+        [
+          "Chapter 8: Basic Geometrical Ideas",
+          "Curves (open and closed)"
+        ],
+        [
+          "Chapter 8: Basic Geometrical Ideas",
+          "Interior and exterior regions"
+        ],
+        [
+          "Chapter 8: Basic Geometrical Ideas",
+          "Polygons and their classification"
+        ],
+        [
+          "Chapter 8: Basic Geometrical Ideas",
+          "Circle (radius, diameter, chord, arc)"
+        ],
+        [
+          "Chapter 9: Mensuration",
+          "Perimeter of plane figures"
+        ],
+        [
+          "Chapter 9: Mensuration",
+          "Area of rectangle and square"
+        ],
+        [
+          "Chapter 9: Mensuration",
+          "Area of triangle"
+        ],
+        [
+          "Chapter 9: Mensuration",
+          "Area of parallelogram"
+        ],
+        [
+          "Chapter 9: Mensuration",
+          "Area of circle"
+        ],
+        [
+          "Chapter 9: Mensuration",
+          "Surface area of cuboid and cube"
+        ],
+        [
+          "Chapter 9: Mensuration",
+          "Volume of cuboid and cube"
+        ],
+        [
+          "Chapter 9: Mensuration",
+          "Unit conversions (length, area, volume)"
+        ],
+        [
+          "Chapter 10: Symmetry and Practical Geometry",
+          "Line symmetry"
+        ],
+        [
+          "Chapter 10: Symmetry and Practical Geometry",
+          "Rotational symmetry"
+        ],
+        [
+          "Chapter 10: Symmetry and Practical Geometry",
+          "Reflection symmetry in shapes"
+        ],
+        [
+          "Chapter 10: Symmetry and Practical Geometry",
+          "Drawing circles with compass"
+        ],
+        [
+          "Chapter 10: Symmetry and Practical Geometry",
+          "Constructing line segments"
+        ],
+        [
+          "Chapter 10: Symmetry and Practical Geometry",
+          "Constructing angles"
+        ],
+        [
+          "Chapter 10: Symmetry and Practical Geometry",
+          "Constructing perpendicular bisector"
+        ],
+        [
+          "Chapter 10: Symmetry and Practical Geometry",
+          "Constructing angle bisector"
+        ],
+        [
+          "Chapter 10: Symmetry and Practical Geometry",
+          "Constructing triangles (basic constructions)"
+        ],
+        [
+          "Chapter 11: Data Handling",
+          "Collecting and organizing data"
+        ],
+        [
+          "Chapter 11: Data Handling",
+          "Pictographs"
+        ],
+        [
+          "Chapter 11: Data Handling",
+          "Bar graphs"
+        ],
+        [
+          "Chapter 11: Data Handling",
+          "Line graphs"
+        ],
+        [
+          "Chapter 11: Data Handling",
+          "Reading and interpreting graphs"
+        ],
+        [
+          "Chapter 11: Data Handling",
+          "Mean (average)"
+        ],
+        [
+          "Chapter 11: Data Handling",
+          "Median"
+        ],
+        [
+          "Chapter 11: Data Handling",
+          "Mode"
+        ],
+        [
+          "Chapter 12: Previous Year Paper",
+          "Mixed Olympiad practice (all topics)"
+        ],
+        [
+          "Chapter 12: Previous Year Paper",
+          "Time management strategies"
+        ],
+        [
+          "Chapter 12: Previous Year Paper",
+          "Multi-step word problems"
+        ],
+        [
+          "Chapter 13: Answer Key",
+          "Solutions and answer verification"
+        ],
+        [
+          "Chapter 13: Answer Key",
+          "Error analysis (checking mistakes)"
+        ]
+      ]
+    }
+  }
+}

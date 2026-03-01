@@ -9,10 +9,10 @@
                                         │
                                         ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                                 GUI (Tkinter)                                │
+│                         GUI (Tkinter) or Web (FastAPI)                        │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐ │
-│  │ Start test / │  │ Load PDF     │  │ Chat log     │  │ Input + Send /   │ │
-│  │ Just chat    │  │ (optional)   │  │ (messages)   │  │ I'm ready        │ │
+│  │ Start quiz / │  │ Load PDF     │  │ Chat log     │  │ Input + Send /   │ │
+│  │ Just chat    │  │ (optional)   │  │ (messages)   │  │ Ready button     │ │
 │  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────────┘ │
 └─────────────────────────────────────────────────────────────────────────────┘
      │                        │                    │                    │
@@ -54,8 +54,8 @@
 
 | Component      | Responsibility |
 |----------------|----------------|
-| **GUI**        | User input, show messages, “Start test” / “Just chat”, topic choice, “I’m ready”, Load PDF, progress (Concept → Q1…Q5 → Summary). |
-| **App state**  | `mode` (test \| chat), `topic`, `phase`, optional `loaded_pdf_text`. |
+| **GUI / Web**  | User input, show messages, “Start quiz” / “Just chat”, concept choice, **Ready** button (or type READY), Load PDF, progress (Concept → Q1…Q5 → Summary). |
+| **App state**  | `mode` (quiz \| chat), `quiz_concept`, `quiz_phase`, optional `loaded_pdf_text`. |
 | **App logic**  | On each user message: compute current phase, build phase-specific instruction, call agent with (history + phase instruction + optional PDF), then update phase and UI. |
 | **Agent**      | Single `get_reply(history, pdf_text=..., phase_instruction=...)` that builds API input (system + PDF + history + phase instruction) and returns coach reply. |
 | **OpenAI API** | Produces coach text (explanation, one question, feedback, or summary). |
@@ -71,9 +71,9 @@
                            │ user: "Start test" + topic
                            ▼
                     ┌─────────────┐
-                    │  CONCEPT    │  Coach explains topic; says "Type READY"
+                    │  CONCEPT    │  Coach explains concept; says "When ready, type READY" or click Ready
                     └──────┬──────┘
-                           │ user: "READY" / "I'm ready"
+                           │ user: "READY" or clicks **Ready** button
                            ▼
                     ┌─────────────┐
                     │  READY_WAIT │  (transient) → next: ask Q1
@@ -114,15 +114,15 @@
 ```
   User           GUI              App state           Agent              OpenAI
    │               │                    │                │                  │
-   │  Start test   │                    │                │                  │
-   │  Topic: "Divisibility"              │                │                  │
-   │──────────────►│  phase=concept      │                │                  │
-   │               │  topic=Divisibility │                │                  │
-   │               │  build: system + "Explain topic, then ask READY"         │
+   │  Start quiz   │                    │                │                  │
+   │  Concept: "Divisibility"             │                │                  │
+   │──────────────►│  phase=explain     │                │                  │
+   │               │  quiz_concept=...  │                │                  │
+   │               │  build: system + "Explain concept, then say type READY"  │
    │               │─────────────────────────────────────►│─────────────────►│
    │               │                    │                │◄─────────────────│
    │               │  show explanation  │                │                  │
-   │◄──────────────│  "Type READY when ready"             │                  │
+   │◄──────────────│  "When ready, click Ready or type READY"                │
    │               │                    │                │                  │
    │  READY        │                    │                │                  │
    │──────────────►│  phase=q1          │                │                  │
@@ -158,11 +158,11 @@
 ```mermaid
 flowchart TD
     A([Start]) --> B{Choose mode}
-    B -->|Start test| C[Select topic]
+    B -->|Start quiz| C[Select concept]
     B -->|Just chat| Z[Free-form chat]
     C --> D[Coach explains concept]
     D --> E[Coach: Type READY for 5 questions]
-    E --> F[User: READY]
+    E --> F[User: click Ready or type READY]
     F --> G[Coach asks Q1]
     G --> H[User answers]
     H --> I[Coach: feedback + Q2]
@@ -248,16 +248,19 @@ flowchart LR
 
 ---
 
-## 6. File / module map (proposed)
+## 6. File / module map
 
 ```
 openai/math-olympiad-mentor/
 ├── agent.py              # get_reply(..., pdf_text, phase_instruction), extract_pdf_text
-├── app_gui.py            # GUI, state (mode, phase, topic), send() + phase logic
-├── state.py              # (optional) Phase enum, next_phase(), get_phase_instruction()
-├── requirements.txt
+├── app_gui.py            # Tkinter GUI: state (mode, quiz_phase, quiz_concept), Ready button, send + phase logic
+├── web_app.py            # FastAPI web app: same quiz flow, Ready button, /api/chat, /api/concepts
+├── requirements.txt      # openai, pypdf (GUI)
+├── requirements-web.txt  # + fastapi, uvicorn (web)
+├── k8s/                  # Deployment, Service (optional Ingress)
 └── docs/
-    └── architecture-and-flow.md   # this file
+    ├── architecture-and-flow.md
+    └── using-ollama.md
 ```
 
 ---
@@ -267,7 +270,7 @@ openai/math-olympiad-mentor/
 | Item | Description |
 |------|-------------|
 | **Architecture** | GUI → App state & logic → Agent (builds prompt) → OpenAI API. |
-| **Flow** | Start test → Topic → Concept → READY → Q1 → answer → … → Q5 → answer → Summary → Done / Another test. |
-| **State** | `mode`, `topic`, `phase` (concept \| q1..q5 \| summary \| done). |
+| **Flow** | Start quiz → Concept → Explain → **Ready** (button or type READY) → Q1 → answer → … → Q5 → answer → Summary → Done. |
+| **State** | `mode`, `quiz_concept`, `quiz_phase` (explain \| q1..q5 \| summary \| done). |
 | **Key mechanism** | App injects a **phase instruction** every turn so the coach does exactly one thing (explain, ask one question, evaluate + next question, or summary). |
 | **PDF** | Optional; if present, injected into context so concept/questions can be from the PDF. |

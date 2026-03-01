@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: math-olympiad-coach
+  labels:
+    app: math-olympiad-coach
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP
+      name: http
+  selector:
+    app: math-olympiad-coach

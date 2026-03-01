@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: math-olympiad-coach-config
+data:
+  # Set to your Ollama service URL (e.g. http://ollama:11434 if Ollama runs in cluster)
+  OLLAMA_BASE_URL: "http://localhost:11434"

@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: math-olympiad-coach
+  labels:
+    app: math-olympiad-coach
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: math-olympiad-coach
+  template:
+    metadata:
+      labels:
+        app: math-olympiad-coach
+    spec:
+      containers:
+        - name: web
+          image: math-olympiad-coach:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            # Default: Ollama gpt-oss:latest. For OpenAI set USE_OLLAMA=0 and OPENAI_API_KEY.
+            - name: USE_OLLAMA
+              value: "1"
+            - name: OLLAMA_MODEL
+              value: "gpt-oss:latest"
+            - name: OLLAMA_BASE_URL
+              value: "http://localhost:11434"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

@@ -1,0 +1,22 @@
+# Git and IDE
+.git
+.gitignore
+.vscode
+.idea
+*.md
+docs/
+
+# GUI app and local data (not needed in web image)
+app_gui.py
+data/
+*.pyc
+__pycache__
+.pytest_cache
+*.egg-info
+.eggs
+
+# CI/CD and K8s (not part of image)
+.github
+k8s
+Dockerfile
+.dockerignore

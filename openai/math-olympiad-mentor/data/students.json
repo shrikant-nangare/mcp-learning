@@ -1,0 +1,21 @@
+{
+  "students": {
+    "807ce536-848a-478c-972a-e5c52e481b9d": {
+      "name": "Aadi",
+      "created_at": "2026-03-01T06:05:00.379280+00:00",
+      "memory_notes": "",
+      "concept_status": {
+        "Chapter ## Chapter 1: Knowing Your Numbers \u2192 Natural numbers": "fully understood"
+      },
+      "quiz_history": [
+        {
+          "concept": "Chapter ## Chapter 1: Knowing Your Numbers \u2192 Natural numbers",
+          "score_pct": 60,
+          "passed": true,
+          "date": "2026-03-01T06:07:43.204906+00:00"
+        }
+      ]
+    }
+  },
+  "current_student_id": "807ce536-848a-478c-972a-e5c52e481b9d"
+}

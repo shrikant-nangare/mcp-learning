@@ -1,4 +1,4 @@
-# Required (for agent)
+# Required (for agent). Works with OpenAI or Ollama (OpenAI-compatible API).
 openai
 
 # PDF support (load PDF and ask questions from it)

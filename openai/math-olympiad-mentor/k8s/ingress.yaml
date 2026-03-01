@@ -1,0 +1,21 @@
+# Optional: use with an Ingress controller (nginx, traefik, etc.)
+# Set spec.ingressClassName and host to match your cluster.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: math-olympiad-coach
+  labels:
+    app: math-olympiad-coach
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: math-coach.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: math-olympiad-coach
+                port:
+                  number: 80
