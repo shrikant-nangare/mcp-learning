@@ -5,8 +5,8 @@ Supports OpenAI or Ollama (local). Acts as a coach for 6th grade math olympiad:
 explains concepts, gives hints, solves step-by-step, suggests practice problems.
 Can use a loaded PDF as reference.
 
-Use OpenAI (default): set OPENAI_API_KEY.
-Use Ollama: set USE_OLLAMA=1 (or OLLAMA_BASE_URL). Optional: OLLAMA_MODEL (default gpt-oss:latest).
+Use Ollama (default model: gpt-oss:latest): set USE_OLLAMA=1 (or OLLAMA_BASE_URL). Optional: OLLAMA_MODEL.
+Use OpenAI: set USE_OLLAMA=0 and OPENAI_API_KEY.
 """
 
 import json
@@ -379,7 +379,10 @@ OLLAMA_DEFAULT_MODEL = os.environ.get("OLLAMA_MODEL", "gpt-oss:latest")
 
 
 def _use_ollama() -> bool:
-    return os.environ.get("USE_OLLAMA", "").strip().lower() in ("1", "true", "yes") or bool(os.environ.get("OLLAMA_BASE_URL"))
+    use_ollama = os.environ.get("USE_OLLAMA", "").strip().lower()
+    if use_ollama in ("0", "false", "no"):
+        return False
+    return use_ollama in ("1", "true", "yes") or bool(os.environ.get("OLLAMA_BASE_URL"))
 
 
 def create_client() -> tuple[OpenAI, bool]:

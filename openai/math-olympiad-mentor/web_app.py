@@ -1,7 +1,7 @@
 """
 Grade 6 Maths Olympiad Coach – Web app
 
-FastAPI app for chat and concepts. Uses Ollama by default (gpt-oss:latest). Set USE_OLLAMA=0 for OpenAI.
+FastAPI app for chat and concepts. Uses Ollama by default (model: gemma3). Set USE_OLLAMA=0 for OpenAI.
 Loads PDFs from the books/ folder on startup and exposes REST API + simple chat UI.
 """
 
@@ -19,7 +19,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-# Use Ollama by default with gpt-oss:latest (set USE_OLLAMA=0 for OpenAI)
+# Default to Ollama. To use OpenAI, set USE_OLLAMA=0 and OPENAI_API_KEY.
 os.environ.setdefault("USE_OLLAMA", "1")
 os.environ.setdefault("OLLAMA_MODEL", "gpt-oss:latest")
 
@@ -415,120 +415,233 @@ _CHAT_HTML = """<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Math Olympiad Coach</title>
+  <title>Sixth grade math · Math Coach</title>
   <style>
+    :root{
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --text: #111827;
+      --border: #e5e7eb;
+      --green: #63b000;
+      --green-2: #4ea200;
+      --blue: #2563eb;
+      --red: #dc2626;
+      --shadow: 0 10px 30px rgba(17,24,39,0.08);
+    }
     * { box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; margin: 0; background: #f3f4f6; color: #111; }
-    .container { max-width: 720px; margin: 0 auto; padding: 16px; min-height: 100vh; display: flex; flex-direction: column; }
-    h1 { margin: 0 0 8px; font-size: 1.25rem; }
-    .sub { color: #6b7280; font-size: 0.875rem; margin-bottom: 16px; }
-    #log { height: 360px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; overflow-y: auto; margin-bottom: 12px; flex-shrink: 0; }
-    #log p { margin: 8px 0; }
-    #log .user { color: #1d4ed8; }
-    #log .coach { line-height: 1.5; }
-    #log .coach p { margin: 8px 0; }
-    #log .coach ul, #log .coach ol { margin: 8px 0; padding-left: 24px; }
-    #log .coach li { margin: 4px 0; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; background: var(--bg); color: var(--text); }
+    a { color: inherit; text-decoration: none; }
+
+    .topbar { position: sticky; top: 0; z-index: 50; background: var(--green); color: #fff; }
+    .topbar-inner { max-width: 1320px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 14px; }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 180px; }
+    .brand-mark { width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.18); display: grid; place-items: center; font-weight: 900; letter-spacing: 0.5px; }
+    .brand-text { font-weight: 800; }
+    .search { flex: 1; display: flex; }
+    .search input { width: 100%; padding: 10px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.35); background: rgba(255,255,255,0.18); color: #fff; outline: none; }
+    .search input::placeholder { color: rgba(255,255,255,0.85); }
+    .top-actions { display: flex; align-items: center; gap: 8px; }
+    .top-pill { padding: 8px 10px; border-radius: 999px; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25); font-weight: 700; font-size: 0.85rem; }
+
+    .subnav { background: #ffffff; border-bottom: 1px solid var(--border); }
+    .subnav-inner { max-width: 1320px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+    .subnav-right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+    .mini-btn { display: none; padding: 7px 10px; border-radius: 999px; border: 1px solid var(--border); background: #fff; font-weight: 900; cursor: pointer; }
+    .mini-btn:hover { background: #f3f4f6; }
+    body.coach-mode .mini-btn { display: inline-flex; }
+    .tab { padding: 6px 10px; border-radius: 999px; font-weight: 700; font-size: 0.9rem; color: #374151; }
+    .tab.active { background: #eaf7d9; color: #14532d; border: 1px solid #c7f0a5; }
+    .tab.muted { color: #6b7280; font-weight: 600; }
+
+    .page { max-width: 1320px; margin: 0 auto; padding: 16px; display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
+    .top-area { display: grid; grid-template-columns: 420px minmax(0, 1fr); gap: 16px; align-items: stretch; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); }
+    .card-pad { padding: 14px; }
+    body.coach-mode #skillsHero { display: none; }
+
+    .h1 { margin: 0; font-size: 2rem; letter-spacing: -0.02em; }
+    .sub { color: var(--muted); margin: 6px 0 0; line-height: 1.35; }
+
+    /* Left */
+    .side-title { margin: 0 0 10px; font-size: 1rem; font-weight: 800; }
+    .student-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+    .student-row select { padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border); min-width: 180px; }
+    #newStudentName { padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border); width: 180px; }
+    .btn { padding: 10px 12px; border-radius: 12px; border: 1px solid transparent; cursor: pointer; font-weight: 800; }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-green:hover { background: var(--green-2); }
+    .btn-blue { background: var(--blue); color: #fff; }
+    .btn-blue:hover { filter: brightness(0.95); }
+    .btn-red { background: var(--red); color: #fff; }
+    .btn-red:hover { filter: brightness(0.95); }
+    .btn-gray { background: #6b7280; color: #fff; }
+    .btn-gray:hover { background: #4b5563; }
+    .stack { display: grid; gap: 10px; }
+    #progressSummary { font-size: 0.9rem; color: #6b4f00; }
+
+    .selected-box { border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: #fbfbff; }
+    .selected-label { font-size: 0.9rem; color: #374151; font-weight: 800; display: block; margin-bottom: 10px; }
+    .action-row { display: grid; grid-template-columns: 1fr; gap: 10px; }
+
+    /* Center skills grid */
+    .skills-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding: 14px 14px 10px; border-bottom: 1px solid var(--border); }
+    .skills-head h2 { margin: 0; font-size: 1.1rem; font-weight: 900; }
+    .skills-meta { display: flex; align-items: center; gap: 10px; }
+    .reanalyze { font-size: 0.9rem; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: #fff; font-weight: 900; cursor: pointer; }
+    .reanalyze:hover { background: #f3f4f6; }
+    .hint { padding: 12px 14px; color: var(--muted); }
+
+    .skills-grid { list-style: none; margin: 0; padding: 14px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .chapter-row { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: #fff; }
+    .chapter-header { display: flex; align-items: center; gap: 10px; padding: 12px 12px; background: #f7fafb; border-bottom: 1px solid var(--border); }
+    .chapter-badge { width: 28px; height: 28px; border-radius: 999px; display: grid; place-items: center; font-weight: 900; color: #fff; background: #3b82f6; flex-shrink: 0; }
+    .chapter-title { font-weight: 900; font-size: 0.95rem; color: #111827; }
+    .chapter-sub { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+    .chapter-title-wrap { display: grid; }
+    .chapter-concepts { margin: 0; padding: 10px 12px 12px 34px; }
+    .concept-item { margin: 0; padding: 6px 10px; border-radius: 10px; cursor: pointer; border: 1px solid transparent; display: flex; justify-content: space-between; gap: 10px; }
+    .concept-item:hover { background: #eef6ff; }
+    .concept-item.selected { background: #dcfce7; border-color: #86efac; }
+    .concept-name { font-weight: 700; color: #111827; }
+    .concept-status { font-size: 0.78rem; font-weight: 900; padding: 4px 8px; border-radius: 999px; background: #f3f4f6; color: #374151; white-space: nowrap; }
+    .concept-status.mastered { background: #dcfce7; color: #14532d; border: 1px solid #86efac; }
+    .concept-status.partial { background: #fff7ed; color: #7c2d12; border: 1px solid #fdba74; }
+    .error { color: #dc2626; }
+
+    /* Top chat (Coach) */
+    .coach-card { display: flex; flex-direction: column; min-height: 520px; overflow: hidden; }
+    .chat-head { padding: 12px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .chat-title { font-weight: 900; }
+    #quizStatus { padding: 6px 10px; border-radius: 999px; background: #e0f2fe; border: 1px solid #7dd3fc; font-weight: 900; font-size: 0.82rem; color: #0c4a6e; display: none; }
+    #log { flex: 1; overflow-y: auto; padding: 12px 14px; background: #fff; }
+    #log .user { margin: 10px 0; padding: 10px 12px; border-radius: 12px; background: #eff6ff; border: 1px solid #bfdbfe; }
+    #log .coach { margin: 10px 0; padding: 10px 12px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; line-height: 1.5; }
+    #log .coach h2 { background: #f0fdf4; padding: 8px 10px; border-radius: 10px; border-left: 4px solid #22c55e; margin: 10px 0 6px; }
     #log .coach table { border-collapse: collapse; margin: 10px 0; width: 100%; }
     #log .coach th, #log .coach td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: left; }
-    #log .coach th { background: #f1f5f9; font-weight: 600; }
-    #log .coach code { background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
-    #log .coach pre { background: #1e293b; color: #e2e8f0; padding: 12px; border-radius: 8px; overflow-x: auto; margin: 10px 0; font-size: 12px; }
+    #log .coach th { background: #f1f5f9; font-weight: 800; }
+    #log .coach code { background: #e2e8f0; padding: 2px 6px; border-radius: 6px; font-size: 0.9em; }
+    #log .coach pre { background: #111827; color: #e5e7eb; padding: 12px; border-radius: 12px; overflow-x: auto; margin: 10px 0; font-size: 12px; }
     #log .coach pre code { background: none; padding: 0; color: inherit; }
-    #log .coach blockquote { border-left: 4px solid #94a3b8; margin: 8px 0; padding-left: 16px; color: #475569; }
-    #log .coach strong { font-weight: 700; }
-    #log .coach h2 { background: #f0fdf4; padding: 8px 12px; border-radius: 6px; border-left: 4px solid #059669; margin: 12px 0 6px; }
-    #log .thinking { color: #6b7280; font-style: italic; }
-    .input-row { display: flex; gap: 8px; }
-    #msg { flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; }
-    #send { padding: 10px 20px; background: #2563eb; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
-    #send:hover { background: #1d4ed8; }
-    #send:disabled { opacity: 0.6; cursor: not-allowed; }
-    .concepts { margin-top: 16px; padding: 12px; background: #f0fdf4; border-radius: 8px; font-size: 0.875rem; max-height: 280px; overflow-y: auto; }
-    .concepts h3 { margin: 0 0 8px; font-size: 1rem; }
-    .concepts ul { margin: 0; padding-left: 0; list-style: none; }
-    .concepts .chapter-row { margin: 6px 0; border-radius: 6px; border: 1px solid #bbf7d0; }
-    .concepts .chapter-header { padding: 8px 12px; font-weight: 600; color: #166534; background: #dcfce7; border-radius: 6px; cursor: default; }
-    .concepts .chapter-row:hover .chapter-header { background: #bbf7d0; }
-    .concepts .chapter-concepts { display: none; padding: 4px 0 8px 12px; margin: 0; list-style: none; }
-    .concepts .chapter-row:hover .chapter-concepts { display: block; }
-    .concepts .concept-item { padding: 6px 10px; margin: 2px 0; border-radius: 6px; cursor: pointer; border: 1px solid transparent; }
-    .concepts .concept-item:hover { background: #dcfce7; }
-    .concepts .concept-item.selected { background: #22c55e; color: #fff; border-color: #16a34a; }
-    .concept-actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-    .concept-actions button { padding: 8px 14px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
-    .concept-actions button:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-explain { background: #2563eb; color: #fff; }
-    .btn-quiz { background: #dc2626; color: #fff; }
-    .btn-reanalyze { background: #6b7280; color: #fff; }
-    .btn-reanalyze:hover { background: #4b5563; }
-    .selected-label { font-size: 0.8rem; color: #6b7280; margin-right: 8px; }
-    .error { color: #dc2626; }
-    #quizChoiceBox { margin-top: 12px; padding: 16px; background: #f0fdf4; border-radius: 8px; border: 2px solid #22c55e; }
-    #quizChoiceBox .quiz-question { font-weight: 600; color: #14532d; margin-bottom: 12px; padding: 10px; background: #dcfce7; border-radius: 6px; border-left: 4px solid #22c55e; line-height: 1.4; }
+    #log .thinking { color: var(--muted); font-style: italic; }
+
+    #quizChoiceBox { margin: 10px 14px 0; padding: 12px; background: #f0fdf4; border-radius: 12px; border: 2px solid #22c55e; }
+    #quizChoiceBox .quiz-question { font-weight: 800; color: #14532d; margin-bottom: 10px; padding: 10px; background: #dcfce7; border-radius: 10px; border-left: 4px solid #22c55e; line-height: 1.4; }
     #quizChoiceBox h4 { margin: 0 0 6px; font-size: 0.9rem; color: #166534; }
-    #quizChoiceBox .quiz-options { margin: 10px 0; }
-    #quizChoiceBox label { display: block; margin: 8px 0; cursor: pointer; padding: 6px 8px; border-radius: 4px; line-height: 1.4; }
+    #quizChoiceBox label { display: block; margin: 8px 0; cursor: pointer; padding: 6px 8px; border-radius: 8px; line-height: 1.4; }
     #quizChoiceBox label:hover { background: #dcfce7; }
     #quizChoiceBox input[type=radio], #quizChoiceBox input[type=checkbox] { margin-right: 10px; vertical-align: top; margin-top: 3px; }
-    #quizChoiceBox .submit-quiz { margin-top: 12px; padding: 10px 20px; background: #16a34a; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
-    #readyBtnWrap { margin-top: 12px; padding: 12px 16px; background: #f0fdf4; border-radius: 8px; border: 2px solid #22c55e; }
-    #readyBtnWrap .ready-btn { padding: 10px 20px; background: #16a34a; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    #quizChoiceBox .submit-quiz { margin-top: 10px; padding: 10px 14px; background: #16a34a; color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 900; }
+
+    #readyBtnWrap { margin: 10px 14px 0; padding: 12px; background: #f0fdf4; border-radius: 12px; border: 2px solid #22c55e; }
+    #readyBtnWrap .ready-btn { padding: 10px 14px; background: #16a34a; color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 900; width: 100%; }
     #readyBtnWrap .ready-btn:hover { background: #15803d; }
-    #quizStatus { margin-bottom: 10px; padding: 10px 14px; background: #e0f2fe; border-radius: 8px; border-left: 4px solid #0284c7; font-weight: 600; font-size: 0.95rem; color: #0c4a6e; display: none; }
-    .student-section { margin-bottom: 16px; padding: 12px 14px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #d97706; }
-    .student-section h3 { margin: 0 0 8px; font-size: 1rem; }
-    .student-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
-    .student-row select { padding: 6px 10px; border-radius: 6px; border: 1px solid #d1d5db; min-width: 160px; }
-    .student-row button { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
-    .btn-add-student { background: #059669; color: #fff; }
-    .btn-add-student:hover { background: #047857; }
-    #progressSummary { font-size: 0.875rem; color: #92400e; margin-top: 8px; }
-    #newStudentName { padding: 6px 10px; border-radius: 6px; border: 1px solid #d1d5db; width: 140px; }
+
+    .input-row { display: flex; gap: 10px; padding: 12px 14px; border-top: 1px solid var(--border); background: #fff; }
+    #msg { flex: 1; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; font-size: 1rem; }
+    #send { padding: 10px 16px; background: var(--blue); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 900; }
+    #send:hover { filter: brightness(0.95); }
+    #send:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    @media (max-width: 900px) {
+      .top-area { grid-template-columns: 1fr; }
+      .skills-grid { grid-template-columns: 1fr; }
+      .brand { min-width: auto; }
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>Grade 6 Maths Olympiad Coach</h1>
-    <p class="sub">Choose a concept below or ask a question. Uses the loaded book as reference.</p>
-    <div class="student-section" id="studentSection">
-      <h3>Student profile</h3>
-      <div class="student-row">
-        <select id="studentSelect" aria-label="Select student">
-          <option value="">No student selected</option>
-        </select>
-        <input type="text" id="newStudentName" placeholder="New student name" />
-        <button type="button" class="btn-add-student" id="btnAddStudent">Add student</button>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand" aria-label="Math Coach">
+        <div class="brand-mark">M</div>
+        <div class="brand-text">Math Coach</div>
       </div>
-      <div id="progressSummary"></div>
-    </div>
-    <div id="quizStatus" aria-live="polite"></div>
-    <div id="log"></div>
-    <div id="quizChoiceBox" style="display:none;">
-      <h4 id="quizChoiceTitle">Multiple choice – choose one:</h4>
-      <div id="quizChoiceQuestion" class="quiz-question"></div>
-      <div id="quizChoiceOptions" class="quiz-options"></div>
-      <button type="button" class="submit-quiz" id="submitQuizBtn">Submit answer</button>
-    </div>
-    <div id="readyBtnWrap" style="display:none;">
-      <button type="button" class="ready-btn" id="readyBtn">I'm ready – start 5 questions</button>
-    </div>
-    <div class="input-row">
-      <input type="text" id="msg" placeholder="Type your question or choose a concept below..." />
-      <button type="button" id="send">Send</button>
-    </div>
-    <div class="concepts" id="conceptsBox">
-      <h3>Concepts from book – click to select</h3>
-      <div class="concept-actions">
-        <span class="selected-label" id="selectedLabel">No concept selected</span>
-        <button type="button" id="btnExplain" class="btn-explain" disabled>Explain this concept</button>
-        <button type="button" id="btnQuiz" class="btn-quiz" disabled>Start quiz (5 Q, pass ≥60%)</button>
-        <button type="button" id="btnReanalyze" class="btn-reanalyze">Re-analyze book</button>
+      <div class="search">
+        <input id="conceptSearch" type="text" placeholder="Search topics, skills, and more" autocomplete="off" />
       </div>
-      <p id="conceptsHint" class="concepts-empty" style="display:none; margin:8px 0; color:#6b7280; font-size:0.9rem;"></p>
-      <ul id="conceptsList"></ul>
+      <div class="top-actions">
+        <div class="top-pill">Grade 6</div>
+      </div>
     </div>
+  </div>
+  <div class="subnav">
+    <div class="subnav-inner" role="navigation" aria-label="Subjects">
+      <span class="tab active">Math</span>
+      <span class="tab muted">Language arts</span>
+      <span class="tab muted">Science</span>
+      <span class="tab muted">Social studies</span>
+      <span class="tab muted">Spanish</span>
+      <span class="tab muted">Recommendations</span>
+      <span class="subnav-right">
+        <button type="button" class="mini-btn" id="btnBackToSkills">Back to skills</button>
+      </span>
+    </div>
+  </div>
+
+  <div class="page">
+    <section class="top-area" aria-label="Student and coach">
+      <aside class="card card-pad" aria-label="Student and actions">
+        <h3 class="side-title">Student</h3>
+        <div class="student-row">
+          <select id="studentSelect" aria-label="Select student">
+            <option value="">No student selected</option>
+          </select>
+          <input type="text" id="newStudentName" placeholder="New student name" />
+          <button type="button" class="btn btn-green" id="btnAddStudent">Add</button>
+        </div>
+        <div id="progressSummary"></div>
+
+        <div class="selected-box" style="margin-top: 12px;">
+          <span class="selected-label" id="selectedLabel">No concept selected</span>
+          <div class="action-row">
+            <button type="button" id="btnExplain" class="btn btn-blue" disabled>Explain this skill</button>
+            <button type="button" id="btnQuiz" class="btn btn-red" disabled>Start 5-question quiz</button>
+          </div>
+          <button type="button" id="btnReanalyze" class="reanalyze" style="width:100%; margin-top: 10px;">Re-analyze book</button>
+          <p class="sub" style="margin: 10px 0 0;">Tip: click a skill in the list to select it.</p>
+        </div>
+      </aside>
+
+      <aside class="card coach-card" aria-label="Coach chat">
+        <div class="chat-head">
+          <div class="chat-title">Coach</div>
+          <div id="quizStatus" aria-live="polite"></div>
+        </div>
+        <div id="log"></div>
+        <div id="quizChoiceBox" style="display:none;">
+          <h4 id="quizChoiceTitle">Multiple choice – choose one:</h4>
+          <div id="quizChoiceQuestion" class="quiz-question"></div>
+          <div id="quizChoiceOptions" class="quiz-options"></div>
+          <button type="button" class="submit-quiz" id="submitQuizBtn">Submit answer</button>
+        </div>
+        <div id="readyBtnWrap" style="display:none;">
+          <button type="button" class="ready-btn" id="readyBtn">I'm ready – start 5 questions</button>
+        </div>
+        <div class="input-row">
+          <input type="text" id="msg" placeholder="Ask a question…" />
+          <button type="button" id="send">Send</button>
+        </div>
+      </aside>
+    </section>
+
+    <main class="card" aria-label="Skills list" id="skillsPanel">
+      <div class="card-pad" id="skillsHero">
+        <h1 class="h1">Sixth grade math</h1>
+        <p class="sub">Pick a skill to practice, or ask the coach in the chat panel.</p>
+      </div>
+      <div class="skills-head" id="conceptsBox">
+        <h2>Skills</h2>
+        <div class="skills-meta">
+          <span class="sub" id="conceptsCount"></span>
+        </div>
+      </div>
+      <div id="conceptsHint" class="hint" style="display:none;"></div>
+      <ul id="conceptsList" class="skills-grid"></ul>
+    </main>
   </div>
   <script>
     const log = document.getElementById('log');
@@ -537,6 +650,9 @@ _CHAT_HTML = """<!DOCTYPE html>
     const selectedLabel = document.getElementById('selectedLabel');
     const btnExplain = document.getElementById('btnExplain');
     const btnQuiz = document.getElementById('btnQuiz');
+    const conceptSearch = document.getElementById('conceptSearch');
+    const btnBackToSkills = document.getElementById('btnBackToSkills');
+    const skillsPanel = document.getElementById('skillsPanel');
 
     let selectedConcept = null;
     let conceptsData = [];
@@ -603,10 +719,38 @@ _CHAT_HTML = """<!DOCTYPE html>
       });
     }
 
+    function setCoachMode(enabled) {
+      document.body.classList.toggle('coach-mode', !!enabled);
+    }
+
+    if (btnBackToSkills && skillsPanel) {
+      btnBackToSkills.addEventListener('click', () => {
+        setCoachMode(false);
+        skillsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    function applyConceptFilter() {
+      const q = (conceptSearch && conceptSearch.value || '').trim().toLowerCase();
+      const chapterRows = Array.from(document.querySelectorAll('#conceptsList .chapter-row'));
+      chapterRows.forEach((row) => {
+        const items = Array.from(row.querySelectorAll('.concept-item'));
+        let anyVisible = false;
+        items.forEach((li) => {
+          const hay = (li.dataset.search || '').toLowerCase();
+          const ok = !q || hay.includes(q);
+          li.style.display = ok ? '' : 'none';
+          if (ok) anyVisible = true;
+        });
+        row.style.display = anyVisible ? '' : 'none';
+      });
+    }
+
     async function loadConcepts(reanalyze) {
       const btnReanalyze = document.getElementById('btnReanalyze');
       const conceptsListEl = document.getElementById('conceptsList');
       const conceptsHint = document.getElementById('conceptsHint');
+      const conceptsCount = document.getElementById('conceptsCount');
       if (reanalyze && btnReanalyze) {
         btnReanalyze.disabled = true;
         btnReanalyze.textContent = 'Re-analyzing…';
@@ -616,6 +760,7 @@ _CHAT_HTML = """<!DOCTYPE html>
         const r = await fetch(url);
         const d = await r.json();
         conceptsData = d.concepts || [];
+        if (conceptsCount) conceptsCount.textContent = conceptsData.length ? (conceptsData.length + ' skills') : '';
         conceptsListEl.innerHTML = '';
         const byChapter = {};
         conceptsData.forEach(c => {
@@ -624,26 +769,62 @@ _CHAT_HTML = """<!DOCTYPE html>
           byChapter[ch].push(c);
         });
         const chapterKeys = Object.keys(byChapter).sort((a, b) => {
-          const numA = parseInt(a.match(/\d+/)?.[0] || '0', 10);
-          const numB = parseInt(b.match(/\d+/)?.[0] || '0', 10);
+          const numA = parseInt(a.match(/\\d+/)?.[0] || '0', 10);
+          const numB = parseInt(b.match(/\\d+/)?.[0] || '0', 10);
           if (numA !== numB) return numA - numB;
           return a.localeCompare(b);
         });
-        chapterKeys.forEach(chapter => {
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        const badgeColors = ['#3b82f6', '#a855f7', '#f97316', '#10b981', '#ef4444', '#0ea5e9', '#f59e0b', '#22c55e', '#6366f1'];
+        chapterKeys.forEach((chapter, idx) => {
           const row = document.createElement('li');
           row.className = 'chapter-row';
           const header = document.createElement('div');
           header.className = 'chapter-header';
-          header.textContent = chapter;
+          const badge = document.createElement('div');
+          badge.className = 'chapter-badge';
+          badge.textContent = letters[idx] || String(idx + 1);
+          badge.style.background = badgeColors[idx % badgeColors.length];
+
+          const titleWrap = document.createElement('div');
+          titleWrap.className = 'chapter-title-wrap';
+          const title = document.createElement('div');
+          title.className = 'chapter-title';
+          // Display title without the "Chapter N:" prefix in the big heading when possible
+          const m = String(chapter || '').match(/Chapter\\s*\\d+\\s*:\\s*(.+)/i);
+          title.textContent = m ? m[1].trim() : chapter;
+          const sub = document.createElement('div');
+          sub.className = 'chapter-sub';
+          sub.textContent = chapter;
+          titleWrap.appendChild(title);
+          titleWrap.appendChild(sub);
+
+          header.appendChild(badge);
+          header.appendChild(titleWrap);
           row.appendChild(header);
-          const conceptsUl = document.createElement('ul');
+          const conceptsUl = document.createElement('ol');
           conceptsUl.className = 'chapter-concepts';
           byChapter[chapter].forEach(c => {
             const li = document.createElement('li');
             li.className = 'concept-item';
             li.dataset.chapter = c.chapter;
             li.dataset.concept = c.concept;
-            li.textContent = c.concept + (c.status ? ' (' + c.status + ')' : '');
+            li.dataset.search = (c.chapter || '') + ' ' + (c.concept || '') + ' ' + (c.status || '');
+            const name = document.createElement('span');
+            name.className = 'concept-name';
+            name.textContent = c.concept || '';
+            const status = document.createElement('span');
+            status.className = 'concept-status';
+            if (c.status) {
+              status.textContent = c.status;
+              const s = String(c.status).toLowerCase();
+              if (s.includes('fully')) status.classList.add('mastered');
+              else status.classList.add('partial');
+            } else {
+              status.textContent = 'practice';
+            }
+            li.appendChild(name);
+            li.appendChild(status);
             li.addEventListener('click', (e) => { e.stopPropagation(); setSelected(c); });
             conceptsUl.appendChild(li);
           });
@@ -660,9 +841,10 @@ _CHAT_HTML = """<!DOCTYPE html>
           }
         }
         setSelected(null);
+        applyConceptFilter();
       } catch (e) {
         if (conceptsHint) conceptsHint.style.display = 'none';
-        conceptsListEl.innerHTML = '<p class="error">Could not load concepts. Is the server running? Try Re-analyze book.</p>';
+        conceptsListEl.innerHTML = '<li class="error">Could not load concepts. Try Re-analyze book.</li>';
       }
       if (btnReanalyze) {
         btnReanalyze.disabled = false;
@@ -882,10 +1064,12 @@ _CHAT_HTML = """<!DOCTYPE html>
 
     btnExplain.addEventListener('click', () => {
       if (!selectedConcept) return;
+      setCoachMode(true);
       sendMessage('Explain this concept from the book: ' + selectedConcept.chapter + ' → ' + selectedConcept.concept);
     });
     btnQuiz.addEventListener('click', () => {
       if (!selectedConcept) return;
+      setCoachMode(true);
       quizConcept = selectedConcept;
       quizPhase = 'explain';
       quizResults = [];
@@ -895,6 +1079,7 @@ _CHAT_HTML = """<!DOCTYPE html>
 
     send.addEventListener('click', doSend);
     msg.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); doSend(); } });
+    if (conceptSearch) conceptSearch.addEventListener('input', applyConceptFilter);
 
     loadStudents().then(() => loadConcepts());
   </script>

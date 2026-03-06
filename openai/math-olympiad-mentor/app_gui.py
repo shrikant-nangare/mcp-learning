@@ -5,7 +5,7 @@ Chat-style window: type your question, get the coach's reply.
 Renders coach replies as HTML (tables, lists, bold) if tkhtmlview and markdown
 are installed; otherwise falls back to plain text.
 
-Uses Ollama by default (model gpt-oss:latest). Set USE_OLLAMA=0 and OPENAI_API_KEY to use OpenAI instead.
+Uses Ollama by default (model: gemma3). To use OpenAI, set USE_OLLAMA=0 and OPENAI_API_KEY.
 """
 
 import html as html_lib
@@ -17,7 +17,7 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import font as tkfont, scrolledtext, filedialog
 
-# Use Ollama by default with gpt-oss:latest (set USE_OLLAMA=0 for OpenAI)
+# Default to Ollama. To use OpenAI, set USE_OLLAMA=0 and OPENAI_API_KEY.
 os.environ.setdefault("USE_OLLAMA", "1")
 os.environ.setdefault("OLLAMA_MODEL", "gpt-oss:latest")
 
